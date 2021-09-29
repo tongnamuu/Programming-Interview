@@ -150,3 +150,159 @@ OS는 프로그램을 실행할 환경을 제공한다.
   - 프로세스는 CPU burst를 수행하고 남은 CPU burst가 있다면 Ready Queue의 마지막으로 보낸다.
   - 단점은 Queue가가 크면 FIFO와 비슷하고 Queue가 작으면 context switching이 자주 발생한다.
   
+
+
+## DeadLock ##
+
+- 일련의 프로세스들이 서로가 가진 자원을 기다리며 block된 상태
+
+- Resource(자원) : 하드웨어, 소프트웨어 등을 포함하는 개념(I/O device, CPU cycle, memory space, semaphore 등
+
+프로세스가 자원을 사용하는 절차 
+Request Allocate Use Release
+
+Deadlock Example 1
+- 시스템에 2개의 tape drive가 있다
+
+- 프로세스 p1, p2 각각이 하나의 tape drive를 보유한 채 다른 하나를 기다리고 있다.
+
+Deadlock Example 2
+
+- Binary semaphores A and B 가있고 P0은 A, B 순으로 자원을 요청, 
+- P1은 B, A순으로 요청
+
+- P0 : P(A) P(B)
+- P1 : P(B) P(A)
+
+데드락의 발생조건
+
+1. Mutual exclusion(상호배제) : 매 순간 하나의 프로세스만이 자원을 사용할 수 있음
+2. No preemption(비선점) : 프로세스 자원을 스스로 내어놓을 뿐 강제로 빼앗기지 않음
+3. Hold and wait(보유 대기) : 자원을 가진 프로세스가 다른 자원을 기다릴 때 보유 자원을 놓지 않고 가지고 있음
+4. Circular wait(환형 대기) :자원을 기다리는 프로세스 간에 사이클이 형성된 경우
+
+Resource-Allocation Graph
+Vertex
+Process P={P1, P2, … Pn}
+Resource R={R1, R2, .. Rm}
+Edge
+Request edge Pi->Rj
+Assignment edge Rj -> Pi
+
+그래프에 사이클이 없으면 deadlock이 아니다
+그래프에 cycle이 있으면
+-if only one instance per resource type, then deadlock
+-if several instances per resource type, possibility of deadlock
+
+Deadlock 의 처리방법
+
+1. Deadlock Prevention
+자원할당시 Deadlock의 4가지 필요 조건 중 어느 하나가 만족되지 않도록 하는 것
+2. Deadlock Avoidance
+자원요청에 대한 부가적인 정보를 이용해서 deadlock의 가능성이 없는 경우에만 자원을 할당
+시스템 state가 원래 state로 돌아올 수 있는 경우에만 자원 할당
+3. Deadlock Detection and Recovery
+Deadlock 발생은 허용하되 그에 대한 detection 루틴을 두어 deadlock 발견 시 recover
+4. Deadlock Ignorance
+Deadlock을 시스템이 책임지지 않음, Unix 등 대부분의 OS가 채택
+
+
+*Deadlock Prevention
+Mutual Exclusion : 공유해서는 안되는 자원의 경우 반드시 성립해야 함
+(자원자체의 성격이라 이걸 이용할 수는 없다)
+Hold and Wait : 프로세스가 자원을 요청할 때 다른 어떤 자원도 가지고 있지 않아야 한다
+
+1. 프로세스 시작 시 모든 필요한 자원을 할당 받게 하는 방법
+2. 자원이 필요한 경우 보유자원을 모두 놓고 다시 요청
+(소모값이 크다)
+   - No Preemption – (빼앗을 수 없는 자원들이 있다)
+프로세스가 어떤 자원을 기다려야 하는 경우 이미 보유한 자원이 선점됨
+모든 필요한 자원을 얻을 수 있을 때 그 프로세스는 다시 시작된다
+State를 쉽게 Save하고 restore할 수 있는 자원에서 주로 사용(CPU, memory)
+   - Circular Wait:
+모든 자원 유형에 할당 순서를 정하여 정해진 순서대로만 자원 할당
+예를 들어 순서가 3인 자원 Ri을 보유중인 프로세스 순서가 1인 자원 R_j를 할당 받기 위해서는 우선 Ri를 release해야 한다.
+결론 : Utilization 저하, throughput 감소, starvation 문제
+
+### Deadlock Avoidance ###
+
+- 자원 요청에 대한 부가정보를 이용해서 자원할당이 deadlock으로부터 안전(safe)한지를 동적으로 조사해서 안전한 경우에만 할당
+- 가장 단순하고 일반적인 모델은 프로세스들이 필요로 하는 각 자원 별 최대 사용량을 미리 선언하도록 하는 방법
+- Safe State : 시스템 내의 프로세스들에 대한 safe sequence 가 존재하는 상태
+- Safe Sequence
+-프로세스의 sequence가 safe하려면 pi의 자원 요청이 가용 자원 + 모든 pj(j<i)의 보유자원에 의해 충족되어야 함
+조건을 만족하면 Pi의 자원 요청이 즉시 충족될 수 없으면 모든 pj가 종료될 때까지 기다린다
+Pi-1이 종료되면 pi의 자원요청을 만족시켜 수행한다.
+시스템이 unsafe state에 있으면 possibility of deadlock
+Deadlock avoidance : 시스템이 unsafe state에 들어가지 않는 것을 보장
+
+2가지 경우의 avoidance
+
+1) Single instance per resource types : Resource Allocation Graph Algorithm 사용(자원당 프로세스 하나)
+Claim Edge Pi -> Rj
+프로세스 Pi가 Rj를 미래에 요청할 수 있음(점선)
+해당 자원 요청시 request edge로 바꾸고(실선)
+Rj 가 release 되면 assignment edge는 다시 claim edge로 바뀐다
+Request edge의 assignment edge 변경 시 cycle 이 생기지 않는 경우에만 요청 자원을 할당한다(Claim edge 포함)
+Cycle 생성 여부 조사 시 프로세스 수가 n일 때 O(n^2)이 걸린다.
+2) Multiple instances per resource types : Banker’s Algorithm
+테이블 형태로 만든다.
+P0 P1 P2 P3 P4
+A(10) B(5) C(7) (instance개수)
+Allocation(이미 할당된 자원)
+0 1 0
+2 0 0
+3 0 2
+2 1 1
+0 0 2
+	
+MAX(최대로 요청할 자원)
+	7 5 3
+	3 2 2
+	9 0 2
+	2 2 2
+	4 3 3
+	Need(Max-Allocation)
+	7 4 3
+	1 2 2
+	6 0 0
+	0 1 1
+	4 3 1
+	Available(남아있는 자원)
+	3 3 2 P1 P3만 가능, 이후 Release 된 자원으로 P4 P2 P0 순으로 실행 가능하므로 safe state
+
+### Deadlock Detection and recovery ###
+
+-Deadlock Detection Part
+Resource type 당 single instance인 경우
+Resource Allocation graph에서 cycle이 곧 deadlock을 의미
+Resource type 당 multiple instance 인 경우
+Banker’s algorithm과 유사한 방법 활용
+-Wait-for graph알고리즘
+Resource type 당 single instance인 경우
+Wait-for graph : 자원할당그래프의 변형
+프로세스만으로 node 구성
+Pi가 가지고 있는 자원을 Pk가 기다리는 경우 Pk->Pi(edge)
+-Algorithm
+Wait-for graph에 사이클이 있는지를 주기적으로 조사(O(n^2))
+자원의 최대 사용량을 미리 알 필요가 없음 -> 그래프에 점선이 없음
+Banker’s algorithm의 변형
+Allocation , Request, Available
+(Max가 아니라 Request이다)
+되는대로 최대한 준다,
+그리고 모든 프로세스가 끝날 수 있는 지 확인한다.
+
+-Recovery Part
+Process termination : 
+Abort all deadlocked processes
+Abort one process at a time until the deadlock cycle is eliminated
+Resource Preemption
+비용을 최소화할 victim 선정
+Safe state로 rollback하여 process를 restart
+Starvation 문제
+-동일한 프로세스가 계속해서 victim으로 선정되는 경우
+-cost factor에 rollback 횟수도 같이 고려
+*Deadlock ignorance
+-데드락은 매우 드물게 발생하므로 deadlock에 대한 조치자체가 더 큰 overhead일 수 있다
+시스템에 deadlock이 발생한 경우 시스템이 비정상적으로 작동하는 것을 사람이 느낀 후 직접 process를 죽이는 방법 등으로 대처
+Unix, Windows 등 대부분 범용 OS가  채택

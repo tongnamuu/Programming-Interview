@@ -306,3 +306,88 @@ Starvation 문제
 -데드락은 매우 드물게 발생하므로 deadlock에 대한 조치자체가 더 큰 overhead일 수 있다
 시스템에 deadlock이 발생한 경우 시스템이 비정상적으로 작동하는 것을 사람이 느낀 후 직접 process를 죽이는 방법 등으로 대처
 Unix, Windows 등 대부분 범용 OS가  채택
+
+
+## Main Memory ##
+
+- 프로세스는 실행중인 프로그램이다.
+  - set of instructions kept in a main memory
+- 메모리는 large array of bytes 이고 각각의 address가 있다.
+
+### Memory Space ###
+
+- 각각의 프로세스가 독립적인 메모리 공간을 갖도록 보장해야 한다. 
+
+### Memory Management Strategies ###
+
+- Address Translation: Virtual Address를 Physical Address로 변환
+
+### Background ###
+
+- Memory Management Unit(MMU)
+  - Address Translation은 매우 빨라야 하므로 하드웨어(MMU)가 필요
+  - MMU는 TLB와 Register들로 구성됨
+
+
+### Basic Hardware ###
+
+- Memory Protection을 위해 base와 limit register 사용
+- base register는 Process의 시작주소
+- limit register는 Process의 크기
+- base <= 새롭게 할당되는 프로세스 주소 < base+Limit 
+
+
+## Paging ##
+- Continuous Allocation의 특징중 하나는 연속적으로 프로세스가 할당되는 부분이다. Paging에서는 연속적이지 않다.
+- Logical Memory는 정해진 크기의 Block Page로, 정해진 크기의 Block인 Frame으로 나눌 수 있다.
+- n개의 page를 갖는 프로그램을 구동하기 위해서는 n개의 frame이 존재해야 한다.
+- Memory에 Page Table을 따로 두고 Logical Memory를 Physical Meomory로 변환한다.
+- Paging에서는 Process가 연속적일 필요가 없다.
+
+### Paging Basic Method ###
+
+- Page Number(p): Page Table의 Index, 각 Page별 Physical Memory에서 시작주소를 포함한다.
+- Page Offset(d): Physical Addres로 변환된다.
+
+### Paging-Fragmentation ###
+
+- External Fragmentation: 연속적으로 저장되지 않기 때문에 발생하지 않음
+- Internal Fragmentation: 프로세스의 size가 있고 Page size가 있을 때, 낭비되는 메모리
+- Page는 보통 4KB or 8KB
+
+## Virtual Memory ##
+
+- 현재 수행되는 Process가 메모리에만 존재한다는 보장이 없다.
+- 수행되는 프로그램의 일부분만 메모리로 올라간다.
+- Logical Address Space는 Physical Address Space보다 크거나 같아야 한다.
+- Page 를 교체해야 할 필요가 있다.
+
+### Demanding Page ###
+
+- Page가 필요할 때만 Memory에 올린다.
+- Page가 필요하지 않다면 Physical Memory에 로드되지 않는다.
+
+
+### Page Fault Handling ###
+
+- OS는 PCB에 존재하는 Table을 보고 Invalid Reference인지, 메모리에 Page가 존재하는지 확인한다.
+- Invalid reference라면 abort시키고, 메모리에 Page가 존재하지 않는 것이라면 비어있는 Frame을 찾아낸다.
+- Frame에 Page를 swap in 하고 Process는 끝날때 까지 waiting state이다.
+- Page Fault를 발생시킨 명령어를 다시 실행한다.
+
+## Page Replacement ##
+
+- 비어있는 Frame이 존재하지 않을 때 Replacement가 필요하다.
+- Page Fault를 최소한으로 줄여야 한다.
+
+### Page Replacement Algorithm ###
+
+- FIFO Algorithm
+- Optimal Algorithm
+- LRU Algorithm
+  - Counter Implementation : 페이지에 접근한 시간을 기록
+  - Stack Implementation : 페이지에 참조되면 Stack의 top으로 이동
+- LRU approximation algorithm
+- Counter Based Algorithms: 시간개념없이 호출횟수기반으로 교체
+- *Belady's Anomaly* : 메모리의 크기가 증가하였지만 Page Fault가 늘어나는 현상
+

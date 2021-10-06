@@ -338,6 +338,7 @@ Unix, Windows 등 대부분 범용 OS가  채택
 
 
 ## Paging ##
+
 - Continuous Allocation의 특징중 하나는 연속적으로 프로세스가 할당되는 부분이다. Paging에서는 연속적이지 않다.
 - Logical Memory는 정해진 크기의 Block Page로, 정해진 크기의 Block인 Frame으로 나눌 수 있다.
 - n개의 page를 갖는 프로그램을 구동하기 위해서는 n개의 frame이 존재해야 한다.
@@ -354,6 +355,12 @@ Unix, Windows 등 대부분 범용 OS가  채택
 - External Fragmentation: 연속적으로 저장되지 않기 때문에 발생하지 않음
 - Internal Fragmentation: 프로세스의 size가 있고 Page size가 있을 때, 낭비되는 메모리
 - Page는 보통 4KB or 8KB
+
+## Page Table Structure ##
+
+- Hierarchial Paging
+- 계층을 통한 Paging 기법으로 테이블의 크기를 줄이기 위한 방법
+- Linux에서는 3-level page table을 사용
 
 ## Virtual Memory ##
 
